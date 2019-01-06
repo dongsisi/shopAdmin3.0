@@ -36,7 +36,7 @@
       <el-table-column label="操作">
         <!-- 这是 Vue 中的作用域插槽，可以通过 scope.row 来获取到当前行的数据 -->
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" plain icon="el-icon-edit"></el-button>
+          <el-button size="mini" type="primary" plain icon="el-icon-edit" @click="showUserEditDialog(scope.row)"></el-button>
           <el-button size="mini" type="danger" plain icon="el-icon-delete" @click="delUserById(scope.row.id)"></el-button>
           <el-button size="mini" type="success" plain icon="el-icon-check">分配角色</el-button>
         </template>
@@ -74,7 +74,24 @@
   </div>
 </el-dialog>
     <!-- 编辑用户对话框 -->
+<el-dialog title="编辑用户" :visible.sync="isShowUserEditDialog">
+   <el-form :model="editUserForm" label-width="100px">
+     <el-form-item label="用户名">
+        <el-tag type="info">{{editUserForm.username}}</el-tag>
+     </el-form-item>
+    <el-form-item label="邮箱" prop="email">
+      <el-input v-model="editUserForm.email" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="手机" prop="mobile">
+      <el-input v-model="editUserForm.mobile" autocomplete="off"></el-input>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="isShowUserEditDialog = false">取 消</el-button>
+    <el-button type="primary" @click="editUser">确 定</el-button>
   </div>
+</el-dialog>
+</div>
 </template>
 <script>
 // 导入axios
@@ -130,6 +147,15 @@ export default {
           }
         ]
       },
+      //默认隐藏编辑对话框
+      isShowUserEditDialog:false,
+      //编辑用户数据
+      editUserForm:{
+        id:'',
+        username:'',
+        email:'',
+        mobile:''
+      }
     }
   },
   methods: {
@@ -289,7 +315,50 @@ export default {
     hideUserAddDialog(){
       //重置表单
       this.$refs.userAddFormRef.resetFields()
+    },
+    //编辑功能
+    showUserEditDialog(user){
+      this.isShowUserEditDialog = true
+      // console.log(user)
+      //因为点击编辑框，需要展示信息，所有要先把user传过来，然后把user的值赋给表单对应的值
+      //方法一：
+          // this.editUserForm.username = user.username
+          // this.editUserForm.id = user.id
+          // this.editUserForm.email = user.email
+          // this.editUserForm.mobile = user.mobile
+      //方法二：forin
+      for(let key in this.editUserForm){
+        this.editUserForm[key] = user[key]
+      }
+    },
+
+
+    //编辑功能
+    async editUser(){
+      // console.log('editUser')
+      try{
+        //1.获取当前用户的数据（解构）
+        const {id,email,mobile} = this.editUserForm
+        //2.发送请求，修改数据
+        const res = await this.$http.put(`/users/${id}`,{email,mobile})
+        console.log(res)
+        //3.判段状态码
+        if(res.data.meta.status===200){
+          //3.1成功，关闭对话框
+          this.isShowUserEditDialog = false
+          //3.2成功，提示消息
+          this.$message({
+            type:"success",
+            message:res.data.meta.msg
+          })
+          //3.3刷新列表
+          this.getUserList(this.pagenum,this.searchText)
+        }
+      }catch(error){
+
+      }
     }
+
   }
 }
 </script>
