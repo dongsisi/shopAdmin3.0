@@ -14,7 +14,7 @@
       </el-input>
     </el-col>
     <el-col :span="4">
-      <el-button type="success" plain >添加用户</el-button>
+      <el-button type="success" plain @click="showUserAddDialog">添加用户</el-button>
     </el-col>
 </el-row>
     <!-- 表格组件： -->
@@ -36,14 +36,8 @@
       <el-table-column label="操作">
         <!-- 这是 Vue 中的作用域插槽，可以通过 scope.row 来获取到当前行的数据 -->
         <template slot-scope="scope">
-          <!--
-            size="mini" 按钮的大小
-            type="primary" 按钮的样式
-            plain 是否朴素按钮（空心，镂空）
-            icon="el-icon-edit" 按钮的图标
-          -->
           <el-button size="mini" type="primary" plain icon="el-icon-edit"></el-button>
-          <el-button size="mini" type="danger" plain icon="el-icon-delete"></el-button>
+          <el-button size="mini" type="danger" plain icon="el-icon-delete" @click="delUserById(scope.row.id)"></el-button>
           <el-button size="mini" type="success" plain icon="el-icon-check">分配角色</el-button>
         </template>
       </el-table-column>
@@ -58,9 +52,30 @@
       :current-page="pagenum"
       @current-change="changePage"
     ></el-pagination>
+    <!-- 添加用户对话框 -->
+<el-dialog title="添加用户" :visible.sync="isShowUserAddDialog" @close="hideUserAddDialog">
+  <el-form :model="userAddForm" label-width="100px" :rules="rules" ref="userAddFormRef" >
+    <el-form-item label="用户名" prop="username">
+      <el-input v-model="userAddForm.username" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="密码" prop="password">
+      <el-input v-model="userAddForm.password" autocomplete="off"></el-input>
+    </el-form-item>
+     <el-form-item label="邮箱" prop="email">
+      <el-input v-model="userAddForm.email" autocomplete="off"></el-input>
+    </el-form-item>
+     <el-form-item label="手机号" prop="mobile">
+      <el-input v-model="userAddForm.mobile" autocomplete="off"></el-input>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="isShowUserAddDialog = false">取 消</el-button>
+    <el-button type="primary" @click="addUser">确 定</el-button>
+  </div>
+</el-dialog>
+    <!-- 编辑用户对话框 -->
   </div>
 </template>
-
 <script>
 // 导入axios
 // import axios from 'axios'
@@ -69,7 +84,6 @@ export default {
   created () {
     this.getUserList()
   },
-
   data () {
     return {
       // 用户列表数据
@@ -81,10 +95,43 @@ export default {
       // 每页大小：
       pagesize: 3,
       //搜索框
-      searchText:''
+      searchText:'',
+      //展示与显示添加用户对话框false为隐藏
+      isShowUserAddDialog:false,
+      //添加用户数据
+      userAddForm:{
+        username:'',
+        password:'',
+        email:'',
+        mobile:''
+      },
+      //添加用户的表单验证
+       rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 5, max: 12, message: '用户名长度为5到12个字符', trigger: 'blur'}
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 12, message: '密码长度为6到12个字符', trigger: 'blur' }
+        ],
+        email: [   // 通过 pattern 来指定一个正则表达式来对表单进行验证
+          {
+            pattern: /^([a-zA-Z0-9]+[_|_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/,
+            message: '邮箱格式不正确',
+            trigger: 'blur'
+          }
+        ],
+        mobile: [
+          {
+            pattern: /^1(3|4|5|7|8)\d{9}$/,
+            message: '手机号码格式不正确',
+            trigger: 'blur'
+          }
+        ]
+      },
     }
   },
-
   methods: {
     // 分页获取数据
     async getUserList (pagenum = 1, query = '') {
@@ -117,20 +164,17 @@ export default {
       } else {
         // 失败
         // token失效
-
         // 跳回到登录页面
         this.$router.push('/login')
         // 清除token
         localStorage.removeItem('token')
       }
     },
-
     // 切换分页，获取当前页数据
     changePage (curPage) {
       // console.log('切换分页了：', curPage)
       this.getUserList(curPage,this.searchText)
     },
-
     // 切换用户状态
     async changeUserState (user) {
       try {
@@ -172,13 +216,79 @@ export default {
         // user.mg_state = !user.mg_state
       }
     },
-
     //搜索功能
     search(){
       // console.log(this.searchText)
       //默认查询第一页的用户列表
       this.getUserList(1,this.searchText);
-
+    },
+    //删除功能
+    async delUserById (id) {
+      // 弹出确认对话框
+      try{
+        await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      //发送请求，删除数据
+        const res = await this.$http.delete(`/users/${id}`)
+      // console.log(res)
+          if(res.data.meta.status===200){
+            this.$message({
+              type:'success',
+              message:res.data.meta.msg
+            })
+            //刷新用户列表
+            this.getUserList(1,this.searchText)
+          }else{
+            this.$message({
+              type:'warning',
+              message:res.data.meta.msg
+            })
+          }
+          }catch(err){
+          //取消删除
+          this.$message({
+            type:"info",
+            message:'取消删除'
+          })
+          }
+    },
+    //展示添加用户的对话框(显示和隐藏true或false)
+    showUserAddDialog(){
+      this.isShowUserAddDialog = true
+    },
+    //添加用户功能
+    async addUser(){
+      // console.log("addUser")
+      // console.log(this.userAddForm)  添加的用户的所有信息
+      try{
+        //1.表单验证
+        await this.$refs.userAddFormRef.validate()
+        //2.添加用户代码逻辑
+        const res = await this.$http.post('/users', this.userAddForm)
+        // console.log(res)
+         //2.1判段状态码，
+         if(res.data.meta.status===201){
+           //2.2关闭消息框
+           this.isShowUserAddDialog = false
+           //2.2提示用户信息
+           this.$message({
+             type:'success',
+             message:res.data.meta.msg
+           })
+           //2.3重新刷新列表信息
+          this.getUserList(1,this.searchText)
+         }
+      }catch(err){
+        //3.表单验证失败
+      }
+    },
+    //隐藏添加用户的对话框
+    hideUserAddDialog(){
+      //重置表单
+      this.$refs.userAddFormRef.resetFields()
     }
   }
 }
