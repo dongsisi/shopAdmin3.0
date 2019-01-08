@@ -10,6 +10,7 @@ import Login from '@/components/login/Login'
 import Home from '@/components/home/Home'
 import Users from '@/components/users/Users'
 import Roles from '@/components/roles/Roles'
+import Rights from '@/components/right/Rights'
 // 安装插件
 Vue.use(VueRouter)
 
@@ -34,6 +35,10 @@ const router = new VueRouter({
         {
           path:'/roles',
           component:Roles
+        },
+        {
+          path:'/right',
+          component:Rights
         }
       ]
     },

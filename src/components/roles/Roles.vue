@@ -174,7 +174,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .breadcrumb{
   background-color: #d4dae0;
   font-size:16px;
