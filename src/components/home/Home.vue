@@ -35,52 +35,33 @@
           el-submenu 二级菜单，也就是一个可以展开收起的组件。
             这个组件可以嵌套，形成多级菜单
             index="1" 唯一标志，可以用来设置菜单高亮
-
           el-menu-item 可点击的菜单项组件
             disabled 表示禁用这个菜单
+          :unique-opened="true"是否只保持一个子元素展开
         -->
         <el-menu
-          default-active="4"
+          default-active="$route.path.slice(1)"
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
           :router="true"
+          :unique-opened="true"
         >
-          <el-submenu index="1">
+          <el-submenu :index="level1.order +''" v-for="level1 in menusList" :key="level1.id">
             <!-- 一级菜单的图标和名称： -->
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{ level1.authName }}</span>
             </template>
             <!-- 二级菜单： -->
             <!-- 注意：此处没有添加 "/" 将来会有个bug -->
-            <el-menu-item index="users">
+            <el-menu-item :index="level2.path" v-for="level2 in level1.children" :key="level2.id">
               <!-- 二级菜单的图标和名称： -->
               <template slot="title">
                 <i class="el-icon-menu"></i>
-                <span>用户列表</span>
+                <span>{{ level2.authName }}</span>
               </template>
             </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <!-- 一级菜单的图标和名称： -->
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="roles">
-              <!-- 二级菜单的图标和名称： -->
-              <template slot="title">
-                <i class="el-icon-menu"></i>
-                <span>角色列表</span>
-              </template>
-            </el-menu-item>
-             <el-menu-item index="right">
-                <template slot="title">
-                <i class="el-icon-menu"></i>
-                <span>权限列表</span>
-              </template>
-             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
@@ -95,7 +76,23 @@
 
 <script>
 export default {
+  data(){
+    return{
+      menusList:[]
+    }
+  },
+  created(){
+    this.getMenuList()
+  },
   methods: {
+
+    //导航菜单的功能
+    async getMenuList(){
+      const res = await this.$http.get('/menus')
+      // console.log(res)
+      this.menusList = res.data.data
+    },
+
     // 退出功能
     async logout () {
       try {
