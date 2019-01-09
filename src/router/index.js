@@ -47,7 +47,7 @@ const router = new VueRouter({
           component:Categories
         },
         {
-          path:'/Goods',
+          path:'/Goods/:page?',
           component:Goods
         }
       ]
