@@ -40,14 +40,14 @@
           :unique-opened="true"是否只保持一个子元素展开
         -->
         <el-menu
-          default-active="$route.path.slice(1)"
+          :default-active="activePath"
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
           :router="true"
           :unique-opened="true"
         >
-          <el-submenu :index="level1.order +''" v-for="level1 in menusList" :key="level1.id">
+          <el-submenu :index=" level1.order + '' " v-for="level1 in menusList" :key="level1.id">
             <!-- 一级菜单的图标和名称： -->
             <template slot="title">
               <i class="el-icon-location"></i>
@@ -55,7 +55,9 @@
             </template>
             <!-- 二级菜单： -->
             <!-- 注意：此处没有添加 "/" 将来会有个bug -->
-            <el-menu-item :index="level2.path" v-for="level2 in level1.children" :key="level2.id">
+            <el-menu-item :index="'/' + level2.path"
+              v-for="level2 in level1.children"
+              :key="level2.id">
               <!-- 二级菜单的图标和名称： -->
               <template slot="title">
                 <i class="el-icon-menu"></i>
@@ -83,6 +85,15 @@ export default {
   },
   created(){
     this.getMenuList()
+  },
+  computed: {
+    // 获取需要高亮的哈希值
+    activePath () {
+      const { path } = this.$route
+      const pathArr = path.split('/')
+
+      return pathArr.length === 3 ? '/' + pathArr[1] : path
+    }
   },
   methods: {
 
