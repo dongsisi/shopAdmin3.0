@@ -13,6 +13,8 @@ import Roles from '@/components/roles/Roles'
 import Rights from '@/components/rights/Rights'
 import Categories from '@/components/Categories/Categories'
 import Goods from '@/components/goods/Goods'
+import GoodsAdd from '@/components/goods-add/GoodsAdd'
+
 // 安装插件
 Vue.use(VueRouter)
 
@@ -49,6 +51,10 @@ const router = new VueRouter({
         {
           path:'/Goods/:page?',
           component:Goods
+        },
+        {
+          path:'/goods-add',
+          component:GoodsAdd
         }
       ]
     },

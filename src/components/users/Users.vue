@@ -38,7 +38,7 @@
         <template slot-scope="scope">
           <el-button size="mini" type="primary" plain icon="el-icon-edit" @click="showUserEditDialog(scope.row)"></el-button>
           <el-button size="mini" type="danger" plain icon="el-icon-delete" @click="delUserById(scope.row.id)"></el-button>
-          <el-button size="mini" type="success" plain icon="el-icon-check">分配角色</el-button>
+          <el-button size="mini" type="success" plain icon="el-icon-check" @click="showRoles(scope.row)">分配角色</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,6 +91,27 @@
     <el-button type="primary" @click="editUser">确 定</el-button>
   </div>
 </el-dialog>
+
+<!-- 分配角色对话框 -->
+<el-dialog title="分配角色" :visible.sync="isShowUserRoleDialog">
+  <el-form :model="roleForm" label-width="100px">
+    <el-form-item label="用户名">
+      <!-- <el-input v-model="form.name" autocomplete="off"></el-input> -->
+      <el-tag type="info">{{roleForm.userName}}</el-tag>
+    </el-form-item>
+    <el-form-item label="角色列表">
+      <el-select v-model="roleForm.rid" placeholder="请选择角色：">
+        <el-option v-for="role in roleList" :key="role.id" :label="role.roleName" :value="role.id"></el-option>
+
+      </el-select>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="isShowUserRoleDialog = false">取 消</el-button>
+    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+  </div>
+</el-dialog>
+
 </div>
 </template>
 <script>
@@ -100,6 +121,7 @@ export default {
   // 进入页面，发送请求，获取数据
   created () {
     this.getUserList()
+    this.getRole()
   },
   data () {
     return {
@@ -155,6 +177,14 @@ export default {
         username:'',
         email:'',
         mobile:''
+      },
+      //展示与隐藏分配角色对话框
+      isShowUserRoleDialog:false,
+      //准备用户列表的数据
+      roleList:[],
+      roleForm:{
+        userName:'',
+        rid:-1
       }
     }
   },
@@ -355,7 +385,24 @@ export default {
       }catch(error){
 
       }
+    },
+    //展示分配角色对话框
+    showRoles(curUser){
+      // console.log('showRoles')
+      this.isShowUserRoleDialog=true
+      console.log(curUser)
+      const role = this.roleList.find(item=> item.roleName===curUser.role_name)
+      const rid = role? role.id :''
+      // console.log(rid)
+      this.roleForm.userName = curUser.username;
+      this.roleForm.rid = rid
+    },
+    async getRole(){
+      const res = await this.$http.get('/roles')
+      // console.log(res)
+      this.roleList = res.data.data
     }
+
 
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="goods">
     <!-- 添加商品按钮 -->
-    <el-button type="success" plain>添加商品</el-button>
+    <el-button type="success" plain @click="$router.push('/goods-add')">添加商品</el-button>
    <!-- 表格组件 -->
    <el-table :data="goodsList" stripe style="width: 100%">
      <el-table-column type="index"></el-table-column>
