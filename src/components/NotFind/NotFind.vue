@@ -1,8 +1,9 @@
 <template>
 <div class="NotFind">
   <h1>您访问的页面不存在</h1>
-  <p>将在{{time}}秒回返回首页！</p>
-  <router-link to="/home">点击直接返回首页</router-link>
+  <p>将在{{time}}秒回返回首页！
+    <router-link to="/home">点击直接返回首页</router-link>
+  </p>
 </div>
 </template>
 

@@ -24,6 +24,7 @@
           type="danger"
           icon="el-icon-delete"
           plain
+          @click="delGoods(scope.row.goods_id)"
         ></el-button>
       </template>
     </el-table-column>
@@ -38,7 +39,6 @@
     @current-change="changePage"
   >
   </el-pagination>
-
   <!-- 添加商品对话框 -->
 
   </div>
@@ -79,19 +79,52 @@ export default {
       })
 
       const { goods, pagenum: curPage, total } = res.data.data
-
       this.goodsList = goods
       this.pagenum = curPage - 0
       this.total = total
     },
 
+    //删除
+    async delGoods(id){
+     console.log(id)
+    try{
+      //显示弹出框
+      await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        //发送请求，删除数据
+        const res = await this.$http.delete(`/goods/${id}`)
+        console.log(res)
+        if(res.data.meta.status===200){
+          //提示信息
+          this.$message({
+            type:'success',
+            message:res.data.meta.msg
+          })
+          //刷新商品列表
+          this.getGoodsList()
+        }else{
+          this.$message({
+            type:"warning",
+            message:res.data.meta.msg
+          })
+        }
+    }catch(err){
+        this.$message({
+          type:"info",
+          message:'取消删除'
+        })
+    }
+  },
     //切换页面
    changePage(curPage){
      console.log(curPage)
     //  this.getGoodsList(curPage)
-    this.$router.push(`/goods/${curPage}`)
-    }
-  }
+      this.$router.push(`/goods/${curPage}`)
+      }
+    },
 }
 </script>
 
