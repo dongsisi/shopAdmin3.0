@@ -41,7 +41,7 @@
     <el-table-column prop="roleDesc" label="描述" width="180"> </el-table-column>
     <el-table-column label="操作">
       <template slot-scope="scope">
-        <el-button size="mini" type="primary" plain icon="el-icon-edit"></el-button>
+        <el-button size="mini" type="primary" plain icon="el-icon-edit" @click="showEditingRolesDialog(scope.row)"></el-button>
         <el-button size="mini" type="danger" plain icon="el-icon-delete" @click="delRoles(scope.row.id)"></el-button>
         <el-button size="mini" type="success" plain icon="el-icon-check" @click="showRightsDialog(scope.row)">分配权限</el-button>
       </template>
@@ -66,6 +66,21 @@
   </div>
 </el-dialog>
 
+<!-- 编辑角色对话框 -->
+<el-dialog title="编辑角色" :visible.sync="isShowEditRolesDialog" >
+  <el-form :model="roleForm" label-width="100px">
+    <el-form-item label="角色名称" >
+      <el-input v-model="roleForm.roleName" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="描述">
+      <el-input v-model="roleForm.roleDesc" autocomplete="off"></el-input>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="isShowEditRolesDialog = false">取 消</el-button>
+    <el-button type="primary" @click="editRoles">确 定</el-button>
+  </div>
+</el-dialog>
   </div>
 </template>
 
@@ -84,6 +99,13 @@ export default {
         },
         //当前角色id
         curRoleId:-1,
+        roleForm:{
+          id:'',
+          roleName:'',
+          roleDesc:''
+        },
+        isShowEditRolesDialog:false,
+
       }
     },
 
@@ -189,7 +211,7 @@ export default {
               message:res.data.meta.msg
             })
             //刷新用户列表
-            this.getUserList(1,this.searchText)
+            this.getRolesList(1,this.searchText)
           }else{
             this.$message({
               type:'warning',
@@ -203,6 +225,37 @@ export default {
             message:'取消删除'
           })
        }
+    },
+
+    //显示编辑对话框角色
+    async showEditingRolesDialog(roles){
+      this.isShowEditRolesDialog = true
+      // console.log(roles)
+      //把roles的值赋给表单对应的值,有两种方法
+      for( let key in this.roleForm){
+        this.roleForm[key] = roles[key]
+      }
+    },
+    //编辑功能
+    async editRoles(id){
+     try{
+        //获取当前用户数据
+      const{id,roleName,roleDesc} = this.roleForm
+      const res = await this.$http.put(`/roles/${id}`,{roleName,roleDesc})
+      console.log(res)
+      if(res.data.meta.status===200){
+        //关闭对话框
+        this.isShowEditRolesDialog = false
+        //提示信息
+        this.$message({
+          type:"success",
+          message:res.data.meta.msg
+        })
+        //刷新列表
+        this.getRolesList()
+      }
+     }catch(err){
+     }
     },
 
 
