@@ -18,6 +18,7 @@
           type="primary"
           icon="el-icon-edit"
           plain
+          @click="showEditDialog(scope.row)"
         ></el-button>
         <el-button
           size="mini"
@@ -39,8 +40,27 @@
     @current-change="changePage"
   >
   </el-pagination>
-  <!-- 添加商品对话框 -->
-
+  <!-- 编辑商品对话框 -->
+    <el-dialog title="编辑商品" :visible.sync="isShowEditGoodsDialog">
+  <el-form :model="goodsForm" label-width="100px">
+    <el-form-item label="商品名称" >
+      <el-input v-model="goodsForm.goods_name" autocomplete="off"></el-input>
+    </el-form-item>
+   <el-form-item label="商品价格" >
+      <el-input v-model="goodsForm.goods_price" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="商品重量" >
+      <el-input v-model="goodsForm.goods_weight" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="创建时间" >
+      <el-input v-model="goodsForm.add_time" autocomplete="off"></el-input>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="showEditGoodsDialog = false">取 消</el-button>
+    <el-button type="primary" @click="editGoods">确 定</el-button>
+  </div>
+</el-dialog>
   </div>
 </template>
 
@@ -51,9 +71,22 @@ export default {
        goodsList: [],
        pagenum:1,
        pagesize:5,
-       total:0
+       total:0,
+    isShowEditGoodsDialog:false,
+       goodsForm:{
+        goods_id:'',
+        goods_name:'',
+        goods_price:'',
+        goods_weight:'',
+        add_time:'',
+        goods_number:'',
+        cat_id:'',
+
+       }
     }
+
   },
+
   created(){
     // console.log('当前页：', typeof this.$route.params.page)
     const pagenum = this.$route.params.page - 0
@@ -86,18 +119,18 @@ export default {
 
     //删除
     async delGoods(id){
-     console.log(id)
-    try{
+      console.log(id)
+     try{
       //显示弹出框
-      await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
         //发送请求，删除数据
-        const res = await this.$http.delete(`/goods/${id}`)
-        console.log(res)
-        if(res.data.meta.status===200){
+          const res = await this.$http.delete(`/goods/${id}`)
+          console.log(res)
+         if(res.data.meta.status===200){
           //提示信息
           this.$message({
             type:'success',
@@ -105,7 +138,7 @@ export default {
           })
           //刷新商品列表
           this.getGoodsList()
-        }else{
+         }else{
           this.$message({
             type:"warning",
             message:res.data.meta.msg
@@ -118,6 +151,30 @@ export default {
         })
     }
   },
+    //编辑对话框
+    async showEditDialog(goods){
+      // console.log('showEditDialog')
+      this.isShowEditGoodsDialog = true
+      //获取
+      console.log(goods)
+      for(let key in this.goodsForm){
+        this.goodsForm[key] = goods[key]
+      }
+    },
+    //编辑功能
+    async editGoods (goods_id){
+      console.log(goods_id)
+      try{
+        const {goods_id,goods_name,goods_price,goods_weight,add_time,goods_number, cat_id} = this.goodsForm
+        console.log(goods_id);
+
+        const res = await this.$http.put(`/goods/${goods_id}`,{
+          goods_id,goods_name,goods_price,goods_weight,add_time,goods_number,cat_id
+        })
+        console.log(res)
+      }catch(err){
+      }
+    },
     //切换页面
    changePage(curPage){
      console.log(curPage)
