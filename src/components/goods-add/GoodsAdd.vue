@@ -135,5 +135,16 @@ import { quillEditor } from 'vue-quill-editor'
 </script>
 
 <style>
-
+.el-upload__tip{
+    margin:20px 0;
+}
+.quill-editor{
+  background-color: #fff;
+}
+.ql-container {
+  height:300px;
+}
+.el-button--primary{
+  margin-top:10px;
+}
 </style>

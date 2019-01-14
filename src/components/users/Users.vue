@@ -40,6 +40,8 @@
           <el-button size="mini" type="danger" plain icon="el-icon-delete" @click="delUserById(scope.row.id)"></el-button>
           <el-button size="mini" type="success" plain icon="el-icon-check" @click="showRoles(scope.row)">分配角色</el-button>
         </template>
+
+
       </el-table-column>
     </el-table>
 
@@ -302,14 +304,14 @@ export default {
               type:'warning',
               message:res.data.meta.msg
             })
-          }
+           }
           }catch(err){
           //取消删除
-          this.$message({
+            this.$message({
             type:"info",
             message:'取消删除'
           })
-          }
+       }
     },
     //展示添加用户的对话框(显示和隐藏true或false)
     showUserAddDialog(){
@@ -361,6 +363,7 @@ export default {
         this.editUserForm[key] = user[key]
       }
     },
+
     //编辑功能
     async editUser(){
       // console.log('editUser')

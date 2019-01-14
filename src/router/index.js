@@ -14,7 +14,7 @@ import Rights from '@/components/rights/Rights'
 import Categories from '@/components/Categories/Categories'
 import Goods from '@/components/goods/Goods'
 import GoodsAdd from '@/components/goods-add/GoodsAdd'
-
+import NotFind from '@/components/NotFind/NotFind'
 // 安装插件
 Vue.use(VueRouter)
 
@@ -58,6 +58,7 @@ const router = new VueRouter({
         }
       ]
     },
+    {path:'*',component:NotFind}
   ]
 })
 

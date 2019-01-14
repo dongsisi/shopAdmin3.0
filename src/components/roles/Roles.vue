@@ -42,7 +42,7 @@
     <el-table-column label="操作">
       <template slot-scope="scope">
         <el-button size="mini" type="primary" plain icon="el-icon-edit"></el-button>
-        <el-button size="mini" type="danger" plain icon="el-icon-delete"></el-button>
+        <el-button size="mini" type="danger" plain icon="el-icon-delete" @click="delRoles(scope.row.id)"></el-button>
         <el-button size="mini" type="success" plain icon="el-icon-check" @click="showRightsDialog(scope.row)">分配权限</el-button>
       </template>
    </el-table-column>
@@ -169,7 +169,43 @@ export default {
       })
       //刷新列表
       this.getRolesList()
-    }
+    },
+    //删除角色
+    async delRoles(id){
+      //弹出删除确认对话框
+       try{
+        await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        //发送请求，删除数据
+        const res = await this.$http.delete(`roles/${id}`)
+          // console.log(res)
+        //判段返回数据的状态码
+        if(res.data.meta.status===200){
+            this.$message({
+              type:'success',
+              message:res.data.meta.msg
+            })
+            //刷新用户列表
+            this.getUserList(1,this.searchText)
+          }else{
+            this.$message({
+              type:'warning',
+              message:res.data.meta.msg
+            })
+           }
+          }catch(err){
+          //取消删除
+            this.$message({
+            type:"info",
+            message:'取消删除'
+          })
+       }
+    },
+
+
   }
 }
 </script>
